@@ -22,6 +22,9 @@ def test_unit_doc_registry():
     
     print([q1, q2, q3, None,])
 
+    assert(udr.yaml.dump([q3]) == '- !unit 1 m\n')
+
+
     ystr = udr.yaml.dump([q1, q2, q3, None,])
     assert('- \n- !unit 42 m\n- !unit (42.0000 +/- 2.0000) m\n- \n' == ystr)
 
