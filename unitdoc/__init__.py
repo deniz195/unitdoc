@@ -1,5 +1,5 @@
 import logging
-
+import re 
 import typing
 import attr
 import cattr
@@ -41,6 +41,10 @@ class YAML_extended(YAML):
         if stream is None:
             inefficient = True
             stream = StringIO()
+        print('this is the self: {}'.format(self))
+        print('this is the data: {}'.format(data))
+        print('this is the stream: {}'.format(stream))
+
         YAML.dump(self, data, stream, **kw)
         if inefficient:
             return stream.getvalue()
@@ -91,9 +95,27 @@ class UnitDocRegistry(object):
         self._cattr_converter = self._create_cattr_converter()
 
 
+    # @property
+    # def unit(self):
+    #     return self._unit
+    
     @property
-    def unit(self):
+    def ureg(self):
         return self._unit
+    
+    def unit(self, value):
+
+        tmp = re.sub(' ','',value)
+        pattern = '([0-9]+[.]?[0-9]*)([+][/][-])([0-9]+[.]?[0-9]*)(.+)'
+        groups = re.search(pattern,tmp)
+
+        if groups:
+            val = groups.group(1) + groups.group(4)
+            std = float(groups.group(3))
+            result = self._unit(val).plus_minus(std)
+        else:
+            result = self._unit(value)
+        return result
 
     @property
     def yaml(self):
@@ -104,7 +126,7 @@ class UnitDocRegistry(object):
         return self._cattr_converter
 
     def attrib(self, default=attr.NOTHING, default_unit=None, auto_convert_str=True, description=None, **kwds):    
-        unit_registry = self.unit
+        unit_registry = self.ureg
 
         unit_quantity_classes = (unit_registry.Quantity, unit_registry.Measurement)
 

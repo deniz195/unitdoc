@@ -12,14 +12,15 @@ from unitdoc import UnitDocRegistry
 
 def test_unit_doc_registry():
     udr = UnitDocRegistry()
-    print(udr.yaml)
-    print([udr.unit('1m')])
+
     assert(udr.yaml.dump([udr.unit('1m')]) == '- !unit 1 m\n')
     assert(udr.yaml.dump([None,]) == '- \n')
 
-    q1 = udr.unit.Quantity(float('nan'), 'm')
-    q2 = udr.unit.Quantity(42, 'm')
+    q1 = udr.ureg.Quantity(float('nan'), 'm')
+    q2 = udr.ureg.Quantity(42, 'm')
     q3 = q2.plus_minus(2)
+    
+    print([q1, q2, q3, None,])
 
     ystr = udr.yaml.dump([q1, q2, q3, None,])
     assert('- \n- !unit 42 m\n- !unit (42.0000 +/- 2.0000) m\n- \n' == ystr)
