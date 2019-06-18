@@ -3,6 +3,8 @@ import re
 import typing
 import attr
 import cattr
+import os
+import sys
 
 from collections import OrderedDict
 
@@ -19,7 +21,15 @@ from pathlib import Path
 from ruamel.yaml import YAML, yaml_object
 from ruamel.yaml.compat import StringIO
 
-import pint
+#get path to file and construct the dependencies for the db, pint, mvc accordingly
+path_fn = os.path.dirname(os.path.abspath(__file__))
+path_fn = Path(path_fn)
+pint_mt= path_fn.joinpath('..','..','pint-mtools')
+import sys
+sys.path.append('..')
+sys.path.insert(0, os.fspath(pint_mt))
+
+import pint_mtools
 
 # create logger
 module_logger = logging.getLogger(__name__)
@@ -41,9 +51,6 @@ class YAML_extended(YAML):
         if stream is None:
             inefficient = True
             stream = StringIO()
-        print('this is the self: {}'.format(self))
-        print('this is the data: {}'.format(data))
-        print('this is the stream: {}'.format(stream))
 
         YAML.dump(self, data, stream, **kw)
         if inefficient:
@@ -111,7 +118,9 @@ class UnitDocRegistry(object):
 
         if groups:
             val = groups.group(1) + groups.group(4)
+            print('this is the val and metric:{}'.format(val))
             std = float(groups.group(3))
+            print('this is the std:{}'.format(std))
             result = self._unit(val).plus_minus(std)
         else:
             result = self._unit(value)
@@ -216,7 +225,7 @@ class UnitDocRegistry(object):
 
     def _create_unit(self):
         # initalize unit object
-        unit = pint.UnitRegistry(autoconvert_offset_to_baseunit = True)
+        unit = pint_mtools.UnitRegistry(autoconvert_offset_to_baseunit = True)
         unit.default_format = '.4~g'
 
         unit.define('mAh = milliampere hour')
@@ -227,7 +236,7 @@ class UnitDocRegistry(object):
         unit.define('ppb = 1e-9*count')
         unit.define('molal = mol / kg')
 
-        _c_elchem = pint.Context('elchem')
+        _c_elchem = pint_mtools.Context('elchem')
         _c_elchem.add_transformation('[substance]', '[current] * [time]',
                         lambda unit, x: x* unit('avogadro_number elementary_charge'))
         _c_elchem.add_transformation('[current] * [time]', '[substance]',
