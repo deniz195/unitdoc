@@ -21,14 +21,6 @@ from pathlib import Path
 from ruamel.yaml import YAML, yaml_object
 from ruamel.yaml.compat import StringIO
 
-#get path to file and construct the dependencies for the db, pint, mvc accordingly
-path_fn = os.path.dirname(os.path.abspath(__file__))
-path_fn = Path(path_fn)
-pint_mt= path_fn.joinpath('..','..','pint-mtools')
-import sys
-sys.path.append('..')
-sys.path.insert(0, os.fspath(pint_mt))
-
 import pint_mtools
 
 # create logger

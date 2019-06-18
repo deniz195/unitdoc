@@ -6,8 +6,9 @@ from pathlib import Path
 path_fn = os.path.dirname(os.path.abspath(__file__))
 path_fn = Path(path_fn)
 ud  = path_fn.joinpath('..','unitdoc')
+pint_mt= path_fn.joinpath('..','..','pint-mtools')
 
 import sys
 sys.path.append('..')
 sys.path.insert(0, os.fspath(ud))
-
+sys.path.insert(0, os.fspath(pint_mt))
