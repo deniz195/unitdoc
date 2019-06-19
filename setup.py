@@ -12,14 +12,14 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='json-sensor',
-    version='0.1.1',
-    description='A mini-framework that helps to read data from sensors in a distributed system or machine.',
+    name='unitdoc',
+    version='0.1.2',
+    description='A framework that enables classes that describe physical objects with units and easy serialization.',
     long_description=readme,
     author='Deniz Bozyigit',
     author_email='deniz195@gmail.com',
-    url='https://github.com/deniz195/json-sensor',
+    url='https://github.com/deniz195/unitdoc',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
-    install_requires = ['attr','cattrs','ruamel.yaml','pint','pytest']
+    install_requires = ['attr', 'cattrs', 'ruamel.yaml', 'pint_mtools', 'pytest']
 )
