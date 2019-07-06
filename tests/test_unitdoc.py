@@ -9,7 +9,6 @@ from pathlib import Path
 from unitdoc import UnitDocRegistry
 
 
-
 def test_unit_doc_registry():
     udr = UnitDocRegistry()
 
@@ -67,6 +66,50 @@ def test_unit_doc_registry():
 
 
 
+def test_recover():
+    udr = UnitDocRegistry()
+
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDoc(object):
+        region_name = attr.ib(default=None, converter=str)
+
+        qarea_neg = udr.attrib(default='355mAh/cm**2', description ='Area specific reversible capacity')
+        qarea_1st_neg = udr.attrib(default=None, default_unit='mAh/cm**2', description='Area specific first charge capacity')
+
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDocSmart(SomeDoc):
+        @classmethod
+        def recover_deserialize(cls, d):
+            if 'name' in d:
+                print(f'Trying to recover {cls.__qualname__}')
+                d['region_name'] = d.pop('name')
+            
+            return d
+
+
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDocOld(object):
+        name = attr.ib(default=None, converter=str)
+
+        qarea_neg = udr.attrib(default='355mAh/cm**2', description ='Area specific reversible capacity')
+        qarea_1st_neg = udr.attrib(default=None, default_unit='mAh/cm**2', description='Area specific first charge capacity')
+
+
+    sd_old = SomeDocOld(name = 'A')
+    sd_str = sd_old.serialize()
+
+    # Test failing deserialization
+    with pytest.raises(TypeError,  match="got an unexpected keyword argument"):
+        sd = SomeDoc.deserialize(sd_str)
+    
+    # Test recovery of deserialization
+    sd = SomeDocSmart.deserialize(sd_str)
+    print(sd.serialize())
+    assert(sd.region_name == 'A')
+    
 
 
 

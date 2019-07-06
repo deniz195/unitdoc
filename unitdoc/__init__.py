@@ -260,7 +260,18 @@ class UnitDocRegistry(object):
                 return self.yaml.dump(cattr_converter.unstructure(obj))
         
             def from_yaml(raw_yaml):
-                return cattr_converter.structure(self.yaml.load(raw_yaml), cls)
+                data = self.yaml.load(raw_yaml)
+
+                try:
+                    obj = cattr_converter.structure(data, cls)
+                except:
+                    if hasattr(cls, 'recover_deserialize'):
+                        data_recovered = cls.recover_deserialize(data)
+                        obj = cattr_converter.structure(data_recovered, cls)
+                    else:
+                        raise
+
+                return obj
             
             cls.serialize = to_yaml
             cls.deserialize = from_yaml
