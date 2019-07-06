@@ -264,11 +264,14 @@ class UnitDocRegistry(object):
 
                 try:
                     obj = cattr_converter.structure(data, cls)
-                except:
+                except BaseException as e:
                     if hasattr(cls, 'recover_deserialize'):
+                        module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
                         data_recovered = cls.recover_deserialize(data)
                         obj = cattr_converter.structure(data_recovered, cls)
+                        module_logger.debug(f'Recovery successful!')                                            
                     else:
+                        module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
                         raise
 
                 return obj
