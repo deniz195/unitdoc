@@ -259,7 +259,7 @@ class UnitDocRegistry(object):
 
 
     def serialize(self):
-        cattr_converter = self.cattr_converter
+        cattr_converter = self.cattr
         def decorate_class(cls):
             def to_yaml(obj):
                 return self.yaml.dump(cattr_converter.unstructure(obj))
