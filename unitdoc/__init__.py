@@ -123,7 +123,12 @@ class UnitDocRegistry(object):
         return self._yaml
 
     @property
+    def cattr(self):
+        return self._cattr_converter
+
+    @property
     def cattr_converter(self):
+        module_logger.warning(f'UnitDocRegistry.cattr_converter is deprecated! Use UnitDocRegistry.cattr instead!')                                                    
         return self._cattr_converter
 
     def attrib(self, default=attr.NOTHING, default_unit=None, auto_convert_str=True, description=None, **kwds):    
