@@ -103,7 +103,6 @@ class UnitDocRegistry(object):
         return self._unit
     
     def unit(self, value):
-
         tmp = re.sub(' ','',value)
         pattern = '([0-9]+[.]?[0-9]*)([+][/][-])([0-9]+[.]?[0-9]*)(.+)'
         groups = re.search(pattern,tmp)
@@ -187,6 +186,12 @@ class UnitDocRegistry(object):
             def do_auto_convert_str(u):
                 if u is None: return u
                 if is_quantity(u): return u
+                try:
+                    if math.isnan(u):
+                        return None
+                except TypeError:
+                    pass
+
                 return unit_registry.Quantity(str(u))
 
             converters += [do_auto_convert_str]

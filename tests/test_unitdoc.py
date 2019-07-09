@@ -112,4 +112,23 @@ def test_recover():
     
 
 
+def test_nan():
+    udr = UnitDocRegistry()
+
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDoc(object):
+        area = udr.attrib(default_unit='dimensionless', description ='Area specific reversible capacity')
+
+    sd = SomeDoc(area = '3')
+    assert(sd.area == 3)
+
+    sd = SomeDoc(area = None)
+    assert(sd.area == None)
+
+    sd = SomeDoc(area = float('nan'))
+    assert(sd.area == None)
+
+
+
 
