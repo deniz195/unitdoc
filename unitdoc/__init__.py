@@ -14,6 +14,7 @@ from functools import reduce
 import datetime
 from dateutil import parser
 
+import attr_descriptions
 
 from pathlib import Path
 
@@ -130,7 +131,7 @@ class UnitDocRegistry(object):
         module_logger.warning(f'UnitDocRegistry.cattr_converter is deprecated! Use UnitDocRegistry.cattr instead!')                                                    
         return self._cattr_converter
 
-    def attrib(self, default=attr.NOTHING, default_unit=None, auto_convert_str=True, description=None, **kwds):    
+    def attrib(self, default=attr.NOTHING, default_unit=None, auto_convert_str=True, description=None, significant_digits=None, **kwds):    
         unit_registry = self.ureg
 
         unit_quantity_classes = (unit_registry.Quantity, unit_registry.Measurement)
@@ -171,7 +172,7 @@ class UnitDocRegistry(object):
         metadata['__base_unit'] = base_unit
         metadata['__unit_registry'] = unit_registry
         metadata['__unit_quantity_classes'] = unit_quantity_classes
-        metadata['__description'] = description
+        # metadata['__description'] = description        
         kwds['metadata'] = metadata
         
         converters = [kwds['converter']] if 'converter' in kwds else []   
@@ -222,8 +223,10 @@ class UnitDocRegistry(object):
         kwds['validator'] = validator
                     
         kwds['default'] = default
-        
-        return attr.ib(**kwds)
+
+        attribute = attr_descriptions.describe(attr.ib(**kwds), description=description, significant_digits=significant_digits)
+
+        return attribute
 
     def _create_unit(self):
         # initalize unit object
@@ -254,14 +257,22 @@ class UnitDocRegistry(object):
         return yaml
 
 
-    def _create_cattr_converter(self):
-        cattr_converter = cattr.Converter()
+    def _create_cattr_converter(self, *args, **kwds):
+        ''' Create new cattr converter which is hooked up to all relevant (un-)structure hooks '''
+        cattr_converter = cattr.Converter(*args, **kwds)
+        cattr_converter = self._hook_cattr_converter(cattr_converter)
+        return cattr_converter
 
+    def _hook_cattr_converter(self, cattr_converter):
         cattr_converter.register_structure_hook(self._unit.Quantity, lambda d, t: t(d))
         cattr_converter.register_unstructure_hook(datetime.datetime, lambda dt: dt.isoformat())
         cattr_converter.register_structure_hook(datetime.datetime, lambda ts, _: parser.parse(ts))
         return cattr_converter
 
+    def create_cattr_converter(self, *args, **kwds):
+        ''' Create new cattr converter which is hooked up to all relevant (un-)structure hooks.
+        Pass all arguments to this function to the constructor of the converter '''
+        return self._create_cattr_converter(self, *args, **kwds)
 
     def serialize(self):
         cattr_converter = self.cattr
