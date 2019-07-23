@@ -13,13 +13,13 @@ with open('LICENSE') as f:
 
 setup(
     name='unitdoc',
-    version='0.1.2',
+    version='0.1.3',
     description='A framework that enables classes that describe physical objects with units and easy serialization.',
     long_description=readme,
     author='Deniz Bozyigit',
     author_email='deniz195@gmail.com',
     url='https://github.com/deniz195/unitdoc',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
-    install_requires = ['attr', 'cattrs', 'ruamel.yaml', 'pint_mtools', 'pytest']
+    packages=find_packages(exclude=('tests', 'docs')),
+    install_requires = ['attr', 'cattrs', 'ruamel.yaml', 'pint_mtools']
 )
