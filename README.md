@@ -26,8 +26,9 @@ We can create an instance of `Battery`, which will be a normal `attr` object, wh
 ```python
 a_battery = Battery(name = 'battery', weight='43g')
 print(a_battery)
-# outputs: Battery(name='battery', weight=&lt Quantity(43, 'gram')&gt, volume=&ltQuantity(16, 'milliliter')&gt, capacity=&ltQuantity(3.0, 'Ah')&gt, voltage=&ltQuantity(3.6, 'volt')&gt)
+# outputs: Battery(name='battery', weight=<Quantity(43, 'gram')>, volume=<Quantity(16, 'milliliter')>, capacity=<Quantity(3.0, 'Ah')>, voltage=<Quantity(3.6, 'volt')>)
 ```
+
 
 We can use the attributes of the battery in any operation that are allowed by the pint package:
 ```python
