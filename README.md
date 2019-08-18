@@ -1,26 +1,7 @@
 # Unitdoc
 
-Unitdoc is a Python library for dealing with data objects which need units for their properties and provide (de-)serialization for these objects. Unitdoc uses attrs, cattr, pint and ruamel.yamls packages to achieve this.
-
-## Installation
-
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install unitdoc:
-
-```bash
-pip install unitdoc
-```
-
-Alternatively, install the latest version from git:
-```bash
-git clone https://github.com/deniz195/unitdoc
-python unitdoc/setup.py install --user
-```
-
-## Usage
-
-First, import unitdoc and create the registry that you will use in your application:
+Unitdoc is a Python library for dealing with data objects which describe physical objects with units and easy serialization. Let's look at an example. First, import unitdoc and create the registry that you will use in your application:
 ```python
-import attr
 from unitdoc import UnitDocRegistry
 
 udr = UnitDocRegistry()
@@ -28,6 +9,8 @@ udr = UnitDocRegistry()
 
 Let's create a class that represents a battery
 ```python
+import attr
+
 @udr.serialize()   
 @attr.s()
 class Battery(object):
@@ -43,7 +26,7 @@ We can create an instance of `Battery`, which will be a normal `attr` object, wh
 ```python
 a_battery = Battery(name = 'battery', weight='43g')
 print(a_battery)
-# outputs: Battery(name='battery', weight=<Quantity(43, 'gram')>, volume=<Quantity(16, 'milliliter')>, capacity=<Quantity(3.0, 'Ah')>, voltage=<Quantity(3.6, 'volt')>)
+# outputs: Battery(name='battery', weight=&lt Quantity(43, 'gram')&gt, volume=&ltQuantity(16, 'milliliter')&gt, capacity=&ltQuantity(3.0, 'Ah')&gt, voltage=&ltQuantity(3.6, 'volt')&gt)
 ```
 
 We can use the attributes of the battery in any operation that are allowed by the pint package:
@@ -82,7 +65,58 @@ assert a_battery == a_loaded_battery
 ```
 
 
+## Installation
 
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install unitdoc:
+
+```bash
+pip install unitdoc
+```
+
+Alternatively, install the latest version from git:
+```bash
+git clone https://github.com/deniz195/unitdoc
+python unitdoc/setup.py install --user
+```
+
+## Related packages
+Unitdoc is based on the following amazing packages:
+
+- [pint](https://pint.readthedocs.io/) deals with the units
+- [ruamel.yamls](https://yaml.readthedocs.io/en/latest/) deals with (de)serializing from semi-structured data (nested dictionaries)
+- [attrs](https://github.com/python-attrs/attrs) deals with the boilerplate of data classes
+- [cattr](https://github.com/Tinche/cattrs) deals with the unstructuring and restructuring of classes for (de)serialization
+
+The UnitDocRegistry creates registries/converters/parsers for each package and aggregates them. You can leverage the features of each package:
+
+Use unit registry from pint:
+```python
+q = udr.ureg('1000gram').to('kg')
+print(q)
+# outputs: 1 kg
+```
+
+Use yaml parser from ruaml.yaml:
+```python
+q_yaml = udr.yaml.dump(dict(weight=q))
+print(q_yaml)
+# outputs: weight: !unit 1 kg
+```
+
+Use cattr converter:
+```python
+@udr.serialize()   
+@attr.s()
+class Thing(object):
+    weight = udr.attrib(default='45g', description ='Total weight')
+
+a_thing = Thing()
+a_thing_dict = udr.cattr.unstructure(a_thing)
+
+assert type(a_thing_dict) == dict
+print(a_thing_dict['weight'])
+# output: 45 g
+```
 
 
 ## Contributing
