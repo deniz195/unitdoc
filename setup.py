@@ -11,7 +11,7 @@ with open('README.md', encoding='utf-8') as f:
 setup(
     name='unitdoc',
     version='0.2.1',
-    description='A framework that enables classes that describe physical objects with units and easy serialization.',
+    description='Classes that describe physical objects with units and easy serialization.',
     long_description=readme,
     long_description_content_type='text/markdown',   
     author='Deniz Bozyigit',
