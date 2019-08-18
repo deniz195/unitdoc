@@ -1,0 +1,5 @@
+name: battery
+weight: !unit 43 g
+volume: !unit 16 ml
+capacity: !unit 3 Ah
+voltage: !unit 3.6 V
