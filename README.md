@@ -22,7 +22,7 @@ class Battery(object):
     voltage = udr.attrib(default='3.6V', description ='Average voltage')
 ```
 
-We can create an instance of `Battery`, which will be a normal `attr` object, which features e.g. a nice `repr` function:
+We can create an instance of `Battery`, which will be a normal `attr` object (see [attrs library](https://github.com/python-attrs/attrs)), which features e.g. a nice `repr` function:
 ```python
 a_battery = Battery(name = 'battery', weight='43g')
 print(a_battery)
