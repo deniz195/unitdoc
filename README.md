@@ -68,7 +68,7 @@ assert a_battery == a_loaded_battery
 ## More features
 Unitdoc facilitates certain operations, which can improve your code. 
 
-If you specify `default_unit` in an attribute, wuantities are automatically normalized to that unit:
+If you specify `default_unit` in an attribute, quantities are automatically normalized to that unit:
 ```python
 a_battery = Battery(name = 'battery', volume='15903 mm^3')
 print(a_battery.volume)
@@ -175,7 +175,7 @@ The keyword only restriction, will not allow the creation of objects from positi
 ```python
 a_battery = BetterBattery('battery', '42g', '16ml') 
 ```
-This is good, because positional arguments can be dangerous when data model changes over time. In the new class the following works and is stable even if the class changes
+This is good, because positional arguments can be dangerous when data model changes over time. The following line creates a new object and is stable if the class changes
 ```python
 a_battery = BetterBattery(name='battery', weight='42g', volume='16ml') 
 ```
@@ -190,7 +190,7 @@ a_battery = attr.evolve(a_battery, volume='12cm^3')
 ```
 In this case unit conversion and checks are performed as expected.
 
-
+While unitdoc works with regular `attr` classes (`@attr.s()`), we strongly recommend using `@attr.s(kw_only=True, frozen=True)`.
 
 
 
