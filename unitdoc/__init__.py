@@ -15,6 +15,7 @@ import datetime
 from dateutil import parser
 
 import attr_descriptions
+from attr_descriptions import get_attr_description
 
 from pathlib import Path
 
@@ -23,6 +24,8 @@ from ruamel.yaml import YAML, yaml_object
 from ruamel.yaml.compat import StringIO
 
 import pint_mtools
+
+from pint_mtools import DimensionalityError
 
 # create logger
 module_logger = logging.getLogger(__name__)

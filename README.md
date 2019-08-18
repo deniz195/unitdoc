@@ -16,9 +16,9 @@ import attr
 class Battery(object):
     name = attr.ib()
 
-    weight = udr.attrib(default='45g', description ='Total weight')
-    volume = udr.attrib(default='16ml', description ='Total volume')
-    capacity = udr.attrib(default='3.0Ah', description ='Total capacity')
+    weight = udr.attrib(default='45g')
+    volume = udr.attrib(default='16ml', default_unit='ml')
+    capacity = udr.attrib(default='3.0Ah')
     voltage = udr.attrib(default='3.6V', description ='Average voltage')
 ```
 
@@ -64,6 +64,35 @@ with open(fn, 'r') as f:
 
 assert a_battery == a_loaded_battery    
 ```
+
+## More features
+Unitdoc facilitates certain operations, which can improve your code. 
+
+If you specify `default_unit` in an attribute, wuantities are automatically normalized to that unit:
+```python
+a_battery = Battery(name = 'battery', volume='15903 mm^3')
+print(a_battery.volume)
+# outputs: 15.9 ml
+```
+
+If a `default_unit` is specified, any incompatible unit will raise an exception:
+```python
+from unitdoc import DimensionalityError
+
+try:
+    a_battery = Battery(name = 'battery', volume='42 g')
+except DimensionalityError as e:
+    print(e)
+# outputs: Cannot convert from 'gram' ([mass]) to 'milliliter' ([length] ** 3)
+```
+
+You can retrieve description of parameters, for e.g. data representation code
+```python
+from unitdoc import get_attr_description
+print(get_attr_description(a_battery.__class__, 'voltage'))
+# outputs: Average voltage
+```
+
 
 
 ## Installation
@@ -118,6 +147,51 @@ assert type(a_thing_dict) == dict
 print(a_thing_dict['weight'])
 # output: 45 g
 ```
+
+## Restrictions
+Given the restrictions of the attrs package, updating attributes safely requires certain precautions. E.g. given the `Battery` class from above the following is possible but not desirable
+```python
+a_battery = Battery(name = 'battery')
+a_battery.volume = 99
+type(a_battery.volume)
+# outputs: int
+```
+This is not desirable, because unit check and normalizatin is not performed. 
+
+An good way to avoid this (and other problems) is to use keyword only (`kw_only=True`) and frozen (`frozen=True`) `attr` objects. 
+```python
+@udr.serialize()   
+@attr.s(kw_only=True, frozen=True)
+class BetterBattery(object):
+    name = attr.ib()
+
+    weight = udr.attrib(default='45g')
+    volume = udr.attrib(default='16ml', default_unit='ml')
+    capacity = udr.attrib(default='3.0Ah')
+    voltage = udr.attrib(default='3.6V', description ='Average voltage')
+```
+
+The keyword only restriction, will not allow the creation of objects from positional parameters, so that the following line fails with a Type error:
+```python
+a_battery = BetterBattery('battery', '42g', '16ml') 
+```
+This is good, because positional arguments can be dangerous when data model changes over time. In the new class the following works and is stable even if the class changes
+```python
+a_battery = BetterBattery(name='battery', weight='42g', volume='16ml') 
+```
+
+The frozen instance restriction does not allow to mutate an object, so that this line will fail with a `FrozenInstanceError`
+```python
+a_battery.volume = 99 
+```
+To update values, you can use the attr.evolve function, which creates a new object with the updated value
+```python
+a_battery = attr.evolve(a_battery, volume='12cm^3')
+```
+In this case unit conversion and checks are performed as expected.
+
+
+
 
 
 ## Contributing
