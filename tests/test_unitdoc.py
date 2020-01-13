@@ -40,6 +40,19 @@ def test_unit_doc_registry():
     assert((str(uu3.m.n), str(uu3.m.s), str(uu3.u)) == ('1.0', '0.2', 'm'))
 
 
+    # Test correct multiplication of quantity object with unit degC with quantity object with unit dimensionless
+    q4 = udr.ureg.Quantity(34.0)
+    q5 = udr.ureg('degC')
+    q6 = q4 * q5
+    q7 = q5 * q4
+    assert((str(q6), str(q7)) == ('34 celsius', '34 celsius'))
+
+    # Test correct multiplication of measurement object with quantity object with unit degC
+    m1 = udr.ureg.Measurement(33.0, 5.0)
+    m2 = m1 * q5
+    m3 = q5 * m1
+    assert((str(m2), str(m3)) == ('(33 +/- 5) celsius', '33.00+/-5.00 celsius'))
+
 
     @udr.serialize()   
     @attr.s(frozen=True, kw_only=True, )
