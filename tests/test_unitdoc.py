@@ -51,7 +51,7 @@ def test_unit_doc_registry():
     m1 = udr.ureg.Measurement(33.0, 5.0)
     m2 = m1 * q5
     m3 = q5 * m1
-    assert((str(m2), str(m3)) == ('(33 +/- 5) celsius', '33.00+/-5.00 celsius'))
+    assert((str(m2), str(m3)) == ('(33.00 +/- 5.00) celsius', '33.00+/-5.00 celsius'))
 
 
     @udr.serialize()   
