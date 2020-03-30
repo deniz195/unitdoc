@@ -10,7 +10,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='unitdoc',
-    version='0.2.2',
+    version='0.2.3',
     description='Classes that describe physical objects with units and easy serialization.',
     long_description=readme,
     long_description_content_type='text/markdown',   
@@ -19,7 +19,7 @@ setup(
     url='https://github.com/deniz195/unitdoc',
     license="MIT",
     packages=find_packages(exclude=('tests', 'docs', 'examples')),
-    install_requires = ['attrs', 'cattrs', 'attr-descriptions>=0.1.3', 'ruamel.yaml', 'pint_mtools', 'python-dateutil'],
+    install_requires = ['attrs', 'cattrs', 'attr-descriptions>=0.1.3', 'ruamel.yaml', 'pint_mtools>=0.12.3', 'python-dateutil'],
     classifiers=[
         'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         'Intended Audience :: Developers',      # Define that your audience are developers
