@@ -277,34 +277,65 @@ class UnitDocRegistry(object):
         Pass all arguments to this function to the constructor of the converter '''
         return self._create_cattr_converter(self, *args, **kwds)
 
-    def serialize(self):
-        cattr_converter = self.cattr
+
+    def serialize_object(self, obj):
+        return self.yaml.dump(self.cattr.unstructure(obj))
+
+    def deserialize_object(self, raw_yaml, cls):
+        data = self.yaml.load(raw_yaml)
+
+        try:
+            obj = self.cattr.structure(data, cls)
+        except BaseException as e:
+            if hasattr(cls, 'recover_deserialize'):
+                module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
+                data_recovered = cls.recover_deserialize(data)
+                obj = self.cattr.structure(data_recovered, cls)
+                module_logger.debug(f'Recovery successful!')                                            
+            else:
+                module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
+                raise
+
+        return obj
+
+    def serialize_object_to_file(self, obj, filename):
+        serial_data = self.serialize_object(obj)
+        serial_data_binary = serial_data.encode()                    
+
+        with open(filename, 'wb') as f:
+            f.write(serial_data_binary)
+
+        return 
+
+
+    def deserialize_object_from_file(self, filename):
+        with open(filename, 'rb') as f:
+            file_data_binary = f.read()
+            file_data = file_data_binary.decode()
+        
+        return self.deserialize_object(file_data)
+
+
+    def serialize_class(self):
+        
         def decorate_class(cls):
             def to_yaml(obj):
-                return self.yaml.dump(cattr_converter.unstructure(obj))
+                return self.serialize_object(obj)
         
             def from_yaml(raw_yaml):
-                data = self.yaml.load(raw_yaml)
-
-                try:
-                    obj = cattr_converter.structure(data, cls)
-                except BaseException as e:
-                    if hasattr(cls, 'recover_deserialize'):
-                        module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
-                        data_recovered = cls.recover_deserialize(data)
-                        obj = cattr_converter.structure(data_recovered, cls)
-                        module_logger.debug(f'Recovery successful!')                                            
-                    else:
-                        module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
-                        raise
-
-                return obj
+                return self.deserialize_object(raw_yaml, cls)
             
             cls.serialize = to_yaml
             cls.deserialize = from_yaml
             return cls
         
         return decorate_class
+
+
+    def serialize(self):
+        # module_logger.warning('UnitDocRegistry.serialize is deprecated! Use UnitDocRegistry.serialize_class instead!')
+        return self.serialize_class()
+
 
 
 
