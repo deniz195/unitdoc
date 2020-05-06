@@ -1,6 +1,12 @@
 # Unitdoc
+![GitHub](https://img.shields.io/github/license/deniz195/unitdoc)
+![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/deniz195/unitdoc)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/unitdoc?color=green)](https://pypi.python.org/pypi/unitdoc/)
 
-Unitdoc is a Python library for dealing with data objects which describe physical objects with units and easy serialization. Let's look at an example. First, import unitdoc and create the registry that you will use in your application:
+Unitdoc deals with data objects which describe physical objects, by providing properties with physical units and easy serialization and deserialization. 
+
+Let's look at an example. First, import unitdoc and create the registry that you will use in your application:
+
 ```python
 from unitdoc import UnitDocRegistry
 
@@ -22,36 +28,27 @@ class Battery(object):
     voltage = udr.attrib(default='3.6V', description ='Average voltage')
 ```
 
-We can create an instance of `Battery`, which will be a normal `attr` object (see [attrs library](https://github.com/python-attrs/attrs)), which features e.g. a nice `repr` function:
+Let's make a `Battery`
 ```python
 a_battery = Battery(name = 'battery', weight='43g')
 print(a_battery)
 # outputs: Battery(name='battery', weight=<Quantity(43, 'gram')>, volume=<Quantity(16, 'milliliter')>, capacity=<Quantity(3.0, 'Ah')>, voltage=<Quantity(3.6, 'volt')>)
 ```
 
-
-We can use the attributes of the battery in any operation that are allowed by the pint package:
+Let's do interesting calculations: 
 ```python
 energy = (a_battery.capacity * a_battery.voltage).to('Wh')
+print(f'{energy}')
+# outputs: 10.8 Wh
+```
+... and more
+```python
 energy_density = (energy / a_battery.weight).to('Wh/kg')
 print(f'{energy} @  {energy_density}')
 # outputs: 10.8 Wh @  251.2 Wh / kg
 ```
 
-Now let's save and reload our battery object:
-```python
-# look at serialized form
-print(a_battery.serialize())
-
-# outputs:
-name: battery
-weight: !unit 43 g
-volume: !unit 16 ml
-capacity: !unit 3 Ah
-voltage: !unit 3.6 V
-```
-
-This can be easily saved to a file and reloaded again:
+Let's save the battery to a file and reloaded again:
 ```python
 fn = 'a_battery.yaml'
 # save to yaml file
@@ -64,6 +61,31 @@ with open(fn, 'r') as f:
 
 assert a_battery == a_loaded_battery    
 ```
+
+If we look at the `a_battery.yaml` file, we will find:
+```yaml
+name: battery
+weight: !unit 43 g
+volume: !unit 16 ml
+capacity: !unit 3 Ah
+voltage: !unit 3.6 V
+```
+
+This serialization, we can directly get by
+```python
+# look at serialized form
+print(a_battery.serialize())
+
+# outputs:
+name: battery
+weight: !unit 43 g
+volume: !unit 16 ml
+capacity: !unit 3 Ah
+voltage: !unit 3.6 V
+```
+
+Have fun!
+
 
 ## More features
 Unitdoc facilitates certain operations, which can improve your code. 
@@ -93,7 +115,7 @@ print(get_attr_description(a_battery.__class__, 'voltage'))
 # outputs: Average voltage
 ```
 
-
+Unitdoc uses the [attrs library](https://github.com/python-attrs/attrs)), check it out!
 
 ## Installation
 
