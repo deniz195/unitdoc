@@ -113,9 +113,9 @@ class UnitDocRegistry(object):
 
         if groups:
             val = groups.group(1) + groups.group(4)
-            print('this is the val and metric:{}'.format(val))
+#            print('this is the val and metric:{}'.format(val))
             std = float(groups.group(3))
-            print('this is the std:{}'.format(std))
+#            print('this is the std:{}'.format(std))
             result = self._unit(val).plus_minus(std)
         else:
             result = self._unit(value)
