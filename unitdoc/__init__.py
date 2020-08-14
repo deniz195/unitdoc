@@ -269,22 +269,28 @@ class UnitDocRegistry(object):
     @staticmethod
     def _hook_structure_attrs_fromdict_with_recovery(cattr_converter):
         
-        def structure_attrs_fromdict_with_recovery(obj, cls):
-            
-            data = obj
+        def structure_attrs_fromdict_with_recovery(data, cls):
 
             try:
                 obj = cattr_converter.structure_attrs_fromdict(data, cls)
 
             except BaseException as e:
-                if hasattr(cls, 'recover_deserialize'):
-                    # module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
-                    data_recovered = cls.recover_deserialize(data)
-                    obj = cattr_converter.structure(data_recovered, cls)
-                    module_logger.debug(f'Recovery of class {cls.__qualname__} successful!')                                            
-                else:
-                    module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
-                    raise
+                if not hasattr(cls, 'recover_deserialize'):
+                    module_logger.debug(f'Deserialization failed and no recovery available for class {cls.__qualname__} ({e})')
+                    raise e
+                else:                    
+#                     module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
+                    try:
+                        data_recovered = cls.recover_deserialize(data)                
+                        # obj = cattr_converter.structure(data_recovered, cls)
+                        obj = cattr_converter.structure_attrs_fromdict(data_recovered, cls)
+                        module_logger.debug(f'Recovery of class {cls.__qualname__} successful!')                                            
+
+                    except BaseException as e2:
+                        module_logger.debug(f'Deserialization failed for class {cls.__qualname__} ({e})')                                            
+                        module_logger.debug(f'Recovery failed for class {cls.__qualname__} ({e2})')
+                        raise e2
+
 
             return obj
         

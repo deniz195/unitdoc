@@ -1,5 +1,6 @@
 import pytest
 import os
+import typing
 
 import attr
 import cattr
@@ -79,6 +80,8 @@ def test_unit_doc_registry():
 
 
 
+
+
 def test_recover():
     udr = UnitDocRegistry()
 
@@ -89,17 +92,6 @@ def test_recover():
 
         qarea_neg = udr.attrib(default='355mAh/cm**2', description ='Area specific reversible capacity')
         qarea_1st_neg = udr.attrib(default=None, default_unit='mAh/cm**2', description='Area specific first charge capacity')
-
-    @udr.serialize()   
-    @attr.s(frozen=True, kw_only=True, )
-    class SomeDocSmart(SomeDoc):
-        @classmethod
-        def recover_deserialize(cls, d):
-            if 'name' in d:
-                print(f'Trying to recover {cls.__qualname__}')
-                d['region_name'] = d.pop('name')
-            
-            return d
 
 
     @udr.serialize()   
@@ -114,15 +106,62 @@ def test_recover():
     sd_old = SomeDocOld(name = 'A')
     sd_str = sd_old.serialize()
 
+
     # Test failing deserialization
     with pytest.raises(TypeError,  match="got an unexpected keyword argument"):
         sd = SomeDoc.deserialize(sd_str)
     
+
+
     # Test recovery of deserialization
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDocSmart(SomeDoc):
+        @classmethod
+        def recover_deserialize(cls, d):
+            if 'name' in d:
+                print(f'Trying to recover {cls.__qualname__}')
+                d['region_name'] = d.pop('name')
+
+            return d
+
     sd = SomeDocSmart.deserialize(sd_str)
     print(sd.serialize())
-    assert(sd.region_name == 'A')
-    
+    assert(sd.region_name == 'A')    
+
+
+    # Test recovery of deserialization failing
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class SomeDocStupid(SomeDoc):
+        @classmethod
+        def recover_deserialize(cls, d):
+            # doing nothing, so that recovery will fail
+            return d
+
+    with pytest.raises(TypeError,  match="got an unexpected keyword argument"):
+        sd = SomeDocStupid.deserialize(sd_str)
+
+
+
+    # Test recovery of nested class
+    @udr.serialize()   
+    @attr.s(frozen=True, kw_only=True, )
+    class ListSomeDocSmart():
+        docs = attr.ib(default=None, type=typing.List[SomeDocSmart])
+
+    lsds_old = ListSomeDocSmart(docs=[sd_old])
+    lsds_old_str = lsds_old.serialize()
+
+    lsds = ListSomeDocSmart.deserialize(lsds_old_str)
+
+    assert lsds_old_str != lsds.serialize()
+
+    print(lsds_old_str)
+    print(lsds.serialize())
+
+
+
 
 
 def test_nan():
