@@ -10,7 +10,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='unitdoc',
-    version='0.2.3',
+    version='0.3.1',
     description='Classes that describe physical objects with units and easy serialization.',
     long_description=readme,
     long_description_content_type='text/markdown',   

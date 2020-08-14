@@ -266,10 +266,37 @@ class UnitDocRegistry(object):
         cattr_converter = self._hook_cattr_converter(cattr_converter)
         return cattr_converter
 
+    @staticmethod
+    def _hook_structure_attrs_fromdict_with_recovery(cattr_converter):
+        
+        def structure_attrs_fromdict_with_recovery(obj, cls):
+            
+            data = obj
+
+            try:
+                obj = cattr_converter.structure_attrs_fromdict(data, cls)
+
+            except BaseException as e:
+                if hasattr(cls, 'recover_deserialize'):
+                    # module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
+                    data_recovered = cls.recover_deserialize(data)
+                    obj = cattr_converter.structure(data_recovered, cls)
+                    module_logger.debug(f'Recovery of class {cls.__qualname__} successful!')                                            
+                else:
+                    module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
+                    raise
+
+            return obj
+        
+        cattr_converter.register_structure_hook_func(cattr.converters._is_attrs_class, structure_attrs_fromdict_with_recovery)
+        
+        return cattr_converter
+
     def _hook_cattr_converter(self, cattr_converter):
         cattr_converter.register_structure_hook(self._unit.Quantity, lambda d, t: t(d))
         cattr_converter.register_unstructure_hook(datetime.datetime, lambda dt: dt.isoformat())
         cattr_converter.register_structure_hook(datetime.datetime, lambda ts, _: parser.parse(ts))
+        cattr_converter = self._hook_structure_attrs_fromdict_with_recovery(cattr_converter)
         return cattr_converter
 
     def create_cattr_converter(self, *args, **kwds):
@@ -283,19 +310,7 @@ class UnitDocRegistry(object):
 
     def deserialize_object(self, raw_yaml, cls):
         data = self.yaml.load(raw_yaml)
-
-        try:
-            obj = self.cattr.structure(data, cls)
-        except BaseException as e:
-            if hasattr(cls, 'recover_deserialize'):
-                module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__}) ({e})')                                            
-                data_recovered = cls.recover_deserialize(data)
-                obj = self.cattr.structure(data_recovered, cls)
-                module_logger.debug(f'Recovery successful!')                                            
-            else:
-                module_logger.debug(f'Deserialization failed (no recovery available for class {cls.__qualname__}) ({e})')
-                raise
-
+        obj = self.cattr.structure(data, cls)
         return obj
 
     def serialize_object_to_file(self, obj, filename):
