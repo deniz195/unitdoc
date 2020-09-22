@@ -105,8 +105,8 @@ class UnitDocRegistry(object):
     def ureg(self):
         return self._unit
 
-    def unit(self, value):
-        return self._unit(value)
+    def unit(self, value, *args, **kwds):
+        return self._unit(value, *args, **kwds)
 
     @property
     def yaml(self):
