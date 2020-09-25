@@ -56,6 +56,8 @@ def test_unit_doc_registry_roundtrip():
         "55 degC": "55 °C",
         "34 °C": "34 °C",
         "(33.00 +/- 5.00) °C": "(33 +/- 5) °C",
+        '10 Δ°C': '10 Δ°C',
+        '10 delta_celsius': '10 Δ°C',
     }
     roundtrip_quantity_map.update(roundtrip_quantity_map2)
 

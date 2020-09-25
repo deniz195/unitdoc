@@ -255,6 +255,13 @@ class UnitDocRegistry(object):
         unit.add_context(_c_elchem)
         unit.enable_contexts('elchem')
 
+        def fix_delta_celsius(s):
+            s = s.replace('Δ','delta_')
+            s = s.replace('°C','celsius')
+            return s
+
+        unit.preprocessors.append(fix_delta_celsius)
+
         return unit
 
     def _create_yaml(self):
