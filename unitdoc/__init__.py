@@ -4,6 +4,7 @@ import cattr
 
 import math
 from functools import reduce
+from copy import deepcopy
 
 import datetime
 from dateutil import parser
@@ -291,7 +292,8 @@ class UnitDocRegistry(object):
                 else:
                     # module_logger.debug(f'Deserialization failed, trying recovery of class {cls.__qualname__})({e})')
                     try:
-                        data_recovered = cls.recover_deserialize(data)
+                        data_old = deepcopy(data)
+                        data_recovered = cls.recover_deserialize(data_old)
                         # obj = cattr_converter.structure(data_recovered, cls)
                         obj = cattr_converter.structure_attrs_fromdict(data_recovered, cls)
                         module_logger.debug(f'Recovery of class {cls.__qualname__} successful!')
